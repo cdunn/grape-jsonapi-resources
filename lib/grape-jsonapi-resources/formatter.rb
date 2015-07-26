@@ -4,7 +4,7 @@ module Grape
       class << self
         def call(resource, env)
           serialized_resource = serialize_resource(resource, env)
-          serialized_resource ? serialized_resource : Grape::Formatter::Json.call(resource, env)
+          serialized_resource ? serialized_resource.to_json : Grape::Formatter::Json.call(resource, env)
         end
 
         def serialize_resource(resource, env)
