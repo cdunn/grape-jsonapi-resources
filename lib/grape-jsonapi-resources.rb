@@ -1,0 +1,6 @@
+require 'jsonapi-resources'
+require 'grape'
+require 'grape-jsonapi-resources/endpoint_extension'
+require 'grape-jsonapi-resources/api_options_extension'
+require 'grape-jsonapi-resources/formatter'
+require 'grape-jsonapi-resources/version'
