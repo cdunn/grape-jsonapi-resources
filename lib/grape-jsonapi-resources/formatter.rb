@@ -3,8 +3,7 @@ module Grape
     module JSONAPIResources
       class << self
         def call(resource, env)
-          serialized_resource = serialize_resource(resource, env)
-          serialized_resource ? serialized_resource.to_json : Grape::Formatter::Json.call(resource, env)
+          serialize_resource(resource, env) || Grape::Formatter::Json.call(resource, env)
         end
 
         def serialize_resource(resource, env)
@@ -28,7 +27,13 @@ module Grape
             resource_instances = resource_class.new(resource, context)
           end
 
-          JSONAPI::ResourceSerializer.new(resource_class, jsonapi_options).serialize_to_hash(resource_instances)
+          resource_serialzer = JSONAPI::ResourceSerializer.new(resource_class, jsonapi_options).serialize_to_hash(resource_instances)
+          if jsonapi_options[:meta]
+            # Add option to merge top level meta tag as jsonapi-resources does not appear to support this
+            resource_serialzer.as_json.merge(meta: jsonapi_options[:meta]).to_json if jsonapi_options[:meta]
+          else
+            resource_serialzer.to_json
+          end
         end
 
         def build_options_from_endpoint(endpoint)

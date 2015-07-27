@@ -42,7 +42,7 @@ describe Grape::Formatter::JSONAPIResources do
 
     subject { described_class.serialize_resource(user, env) }
 
-    it { should be_a Hash }
+    it { should be_a String }
 
     it 'should have used the correct resource' do
       expect(UserResource).to receive(:new).with(user, {current_user: endpoint.current_user}).once.and_call_original
@@ -59,6 +59,12 @@ describe Grape::Formatter::JSONAPIResources do
       allow(described_class).to receive(:build_options_from_endpoint).with(endpoint).and_return({base_url: "/api/v1"})
       expect(JSONAPI::ResourceSerializer).to receive(:new).with(UserResource, {base_url: "/api/v1"}).and_call_original
       subject
+    end
+
+    it 'should allow custom meta tag' do
+      meta = {total_pages: 123}
+      allow(described_class).to receive(:build_options_from_endpoint).with(endpoint).and_return({meta: meta})
+      expect(subject).to match meta.to_json
     end
   end
 end
