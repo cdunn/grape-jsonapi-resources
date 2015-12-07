@@ -17,7 +17,19 @@ module Grape
           context.merge!(jsonapi_options.delete(:context)) if jsonapi_options[:context]
 
           resource_class = resource_class_for(resource)
-          return nil unless resource_class
+
+          unless resource_class
+            # Return blank object
+            blank_return = {}
+            if resource.is_a?(Array)
+              blank_return[:data] = []
+            else
+              blank_return[:data] = {}
+            end
+            blank_return[:meta] = jsonapi_options[:meta] if jsonapi_options[:meta]
+            return blank_return.to_json
+          end
+
           resource_instances = nil
           if resource.respond_to?(:to_ary)
             resource_instances = resource.to_ary.collect do |each_resource|
