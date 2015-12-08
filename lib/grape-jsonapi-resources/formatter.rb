@@ -18,7 +18,7 @@ module Grape
 
           resource_class = resource_class_for(resource)
 
-          unless resource_class
+          if resource_class.nil? && resource.blank?
             # Return blank object
             blank_return = {}
             if resource.is_a?(Array)
