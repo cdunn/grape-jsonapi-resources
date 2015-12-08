@@ -18,16 +18,20 @@ module Grape
 
           resource_class = resource_class_for(resource)
 
-          if resource_class.nil? && resource.blank?
-            # Return blank object
-            blank_return = {}
-            if resource.is_a?(Array)
-              blank_return[:data] = []
+          if resource_class.nil?
+            if resource.blank?
+              # Return blank object
+              blank_return = {}
+              if resource.is_a?(Array)
+                blank_return[:data] = []
+              else
+                blank_return[:data] = {}
+              end
+              blank_return[:meta] = jsonapi_options[:meta] if jsonapi_options[:meta]
+              return blank_return.to_json
             else
-              blank_return[:data] = {}
+              return nil
             end
-            blank_return[:meta] = jsonapi_options[:meta] if jsonapi_options[:meta]
-            return blank_return.to_json
           end
 
           resource_instances = nil
