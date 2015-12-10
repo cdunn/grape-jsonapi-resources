@@ -22,7 +22,7 @@ module Grape
             if resource.blank?
               # Return blank object
               blank_return = {}
-              if resource.is_a?(Array)
+              if resource.respond_to?(:to_ary)
                 blank_return[:data] = []
               else
                 blank_return[:data] = {}
