@@ -36,8 +36,9 @@ module Grape
 
           resource_instances = nil
           if resource.respond_to?(:to_ary)
-            resource_instances = resource.to_ary.collect do |each_resource|
-              resource_class.new(each_resource, context)
+            resource_instances = resource.to_ary.compact.collect do |each_resource|
+              each_resource_class = resource_class_for(each_resource)
+              each_resource_class.new(each_resource, context)
             end
           else
             resource_instances = resource_class.new(resource, context)
