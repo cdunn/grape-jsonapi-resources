@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'grape'
   gem.add_dependency 'jsonapi-resources', '>= 0.5.0'
 
-  gem.add_development_dependency 'rails-api', '>= 0.4.0'
+  gem.add_development_dependency 'rails', '>= 5.0.0'
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'rack-test'
   gem.add_development_dependency 'rake'

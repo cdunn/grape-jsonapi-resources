@@ -25,6 +25,8 @@ describe Grape::Formatter::JSONAPIResources do
 
   describe '.serialize_resource' do
     let(:user) { User.new(first_name: 'John', id: 123) }
+    let(:user_2) { User.new(first_name: 'Jane', id: 456) }
+    let(:blog_post) { BlogPost.new(title: 'Blag', body: 'Super blag', id: 321) }
 
     if Grape::Util.const_defined?('InheritableSetting')
       let(:endpoint) { Grape::Endpoint.new(Grape::Util::InheritableSetting.new, path: '/', method: 'foo', root: false) }
@@ -53,7 +55,12 @@ describe Grape::Formatter::JSONAPIResources do
       expect(UserResource).to receive(:new).with(user, {current_user: endpoint.current_user}).twice.and_call_original
       described_class.serialize_resource([ user, user ], env)
     end
-    # array
+
+    it 'should maintain order of different resources' do
+      serialized_results = ActiveSupport::JSON.decode(described_class.serialize_resource([user, blog_post, user_2], env))
+      expect(serialized_results["data"].map {|r| r["id"]}).to eq([user.id, blog_post.id, user_2.id].map(&:to_s))
+      expect(serialized_results["data"].map {|r| r["type"]}).to eq(["users", "blog-posts", "users"])
+    end
 
     it 'should specify serializer options like "base_url" and "include"' do
       allow(described_class).to receive(:build_options_from_endpoint).with(endpoint).and_return({base_url: "/api/v1"})

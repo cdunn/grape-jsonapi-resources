@@ -35,22 +35,34 @@ module Grape
           end
 
           resource_instances = nil
+          sorted_primary_ids = nil
           if resource.respond_to?(:to_ary)
             resource_instances = resource.to_ary.compact.collect do |each_resource|
               each_resource_class = resource_class_for(each_resource)
               each_resource_class.new(each_resource, context)
             end
+            sorted_primary_ids = resource_instances.collect { |resource_instance| resource_instance.try(:id) }
           else
             resource_instances = resource_class.new(resource, context)
           end
 
-          resource_serialzer = JSONAPI::ResourceSerializer.new(resource_class, jsonapi_options).serialize_to_hash(resource_instances)
-          if jsonapi_options[:meta]
+          resource_serialzed = JSONAPI::ResourceSerializer.new(resource_class, jsonapi_options).serialize_to_hash(resource_instances)
+          json_output = if jsonapi_options[:meta]
             # Add option to merge top level meta tag as jsonapi-resources does not appear to support this
-            resource_serialzer.as_json.merge(meta: jsonapi_options[:meta]).to_json if jsonapi_options[:meta]
+            resource_serialzed.as_json.merge(meta: jsonapi_options[:meta])
           else
-            resource_serialzer.to_json
+            resource_serialzed
           end
+
+          # Ensure sort order is maintained, serialize_to_hash can reorder objects if
+          # objects of the array are of different types (polymorphic cases)
+          json_output = json_output.stringify_keys
+          if sorted_primary_ids && (data = json_output["data"]).present?
+            sorted_primary_ids = sorted_primary_ids.map(&:to_s)
+            json_output["data"] = data.sort_by { |d| sorted_primary_ids.index(d["id"]) }
+          end
+
+          json_output.to_json
         end
 
         def build_options_from_endpoint(endpoint)

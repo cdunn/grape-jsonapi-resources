@@ -8,3 +8,5 @@ when 'HEAD'
 else
   gem 'grape', version
 end
+
+gem 'jsonapi-resources', "0.8.0.beta2"
